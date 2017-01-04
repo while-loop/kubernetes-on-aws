@@ -69,6 +69,27 @@ coreos:
             [Service]
             Environment="DOCKER_OPTS=--log-opt=max-file=2 --log-opt=max-size=50m"
 
+    - name: teleport.service
+      command: start
+      runtime: true
+      content: |
+        [Unit]
+        Description=Teleport SSH Service
+        After=network.target
+
+        [Service]
+        Type=simple
+        Restart=always
+        ExecStart=/opt/bin/teleport start \
+          --roles node \
+          --debug \
+          --token=secret-token \
+          --advertise-ip=$private_ipv4 \
+          --config=/etc/teleport/config.yaml
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: kubelet.service
       command: start
       runtime: true
@@ -129,6 +150,21 @@ coreos:
         [Install]
         RequiredBy=kubelet.service
 
+    - name: install-teleport.service
+      enable: true
+      content: |
+        [Unit]
+        Description=Install teleport
+        Before=teleport.service
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/opt/bin/install-teleport
+
+        [Install]
+        RequiredBy=teleport.service
+
     - name: install-microscope.service
       command: start
       runtime: true
@@ -142,6 +178,19 @@ coreos:
 
 
 write_files:
+
+  - path: /etc/teleport/config.yaml
+    content: |
+      teleport:
+        data_dir: /var/lib/teleport
+        auth_servers:
+          - teleport.teapot.zalan.do:3025
+      ssh_service:
+        enabled: yes
+        listen_addr: 0.0.0.0:3022
+        labels:
+          role: node
+          type: kubernetes
 
   - path: "/etc/profile.env"
     content: |
@@ -170,6 +219,20 @@ write_files:
           /usr/bin/curl https://even.stups.zalan.do/public-keys/$uid/sshkey.pub -o /home/core/.ssh/authorized_keys.d/$uid
       done
       /usr/bin/update-ssh-keys
+
+  - path: /opt/bin/install-teleport
+    permissions: 0700
+    owner: root:root
+    content: |
+      #!/bin/bash -e
+      # fetch and install teleport
+      VERSION="v1.3.1"
+      TAR="teleport-${VERSION}-linux-amd64-bin.tar.gz"
+
+      curl -L -O https://github.com/gravitational/teleport/releases/download/${VERSION}/${TAR}
+      tar xf ${TAR}
+      mv teleport/teleport /opt/bin/teleport
+      rm -rf ${TAR} teleport
 
   - path: /opt/bin/host-rkt
     permissions: 0755
