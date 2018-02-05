@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cloudformation-operator
+  namespace: kube-system
+  labels:
+    application: cloudformation-operator
+    version: v0.1.1
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      application: cloudformation-operator
+  template:
+    metadata:
+      labels:
+        application: cloudformation-operator
+        version: v0.1.1
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        iam.amazonaws.com/role: "{{ .LocalID }}-app-cloudformation-operator"
+    spec:
+      serviceAccountName: system
+      tolerations:
+       - key: CriticalAddonsOnly
+         operator: Exists
+      containers:
+      - name: cloudformation-operator
+        image: quay.io/linki/cloudformation-operator:v0.1.1
+        args:
+        - --region=eu-central-1
+        - --interval=1m
+        - --debug
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 25m
+            memory: 20Mi
