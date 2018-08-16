@@ -21,7 +21,9 @@ spec:
       serviceAccountName: system
       containers:
       - name: admission-controller
-        image: k8s.gcr.io/vpa-admission-controller:0.2.0
+        # image: k8s.gcr.io/vpa-admission-controller:0.2.0
+        # fixes: https://github.com/maartenvandenbogaard/autoscaler/commit/754bced8e36db0f78fbd21db70f2ab5eeda887b0
+        image: mikkeloscar/vpa-admission-controller:v0.2.1
         volumeMounts:
         - name: tls-certs
           mountPath: "/etc/tls-certs"

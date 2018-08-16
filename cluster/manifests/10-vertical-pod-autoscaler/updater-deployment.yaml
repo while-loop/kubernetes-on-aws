@@ -21,7 +21,14 @@ spec:
       serviceAccountName: system
       containers:
       - name: updater
-        image: k8s.gcr.io/vpa-updater:0.2.0
+        # image: k8s.gcr.io/vpa-updater:0.2.0
+        image: mikkeloscar/vpa-updater:v0.2.1
+        command: ["./updater"]
+        args:
+        - --min-replicas=1
+        # from: https://github.com/kubernetes/autoscaler/blob/58e107abbbae98cdcce15d905ea90e0dc0a8426a/vertical-pod-autoscaler/pkg/updater/Dockerfile#L21
+        - --v=4
+        - --stderrthreshold=info
         resources:
           limits:
             cpu: 50m

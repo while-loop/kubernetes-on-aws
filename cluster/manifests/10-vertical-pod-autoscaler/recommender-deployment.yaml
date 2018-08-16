@@ -21,7 +21,15 @@ spec:
       serviceAccountName: system
       containers:
       - name: recommender
-        image: k8s.gcr.io/vpa-recommender:0.2.0
+        # image: k8s.gcr.io/vpa-recommender:0.2.0
+        image: mikkeloscar/vpa-recommender:v0.2.1
+        command: ["./recommender"]
+        args:
+        # from: https://github.com/kubernetes/autoscaler/blob/58e107abbbae98cdcce15d905ea90e0dc0a8426a/vertical-pod-autoscaler/pkg/recommender/Dockerfile#L20
+        - --v=4
+        - --stderrthreshold=info
+        - --pod-recommendation-min-cpu-millicores=5
+        - --pod-recommendation-min-memory-mb=10
         resources:
           limits:
             cpu: 50m
