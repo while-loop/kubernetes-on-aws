@@ -8,7 +8,7 @@ metadata:
     version: v0.10.94
     component: ingress
 spec:
-  replicas: 3
+  replicas: {{ .ConfigItems.skipper_ingress_min_replicas }}
   selector:
     matchLabels:
       application: skipper-ingress
@@ -64,10 +64,10 @@ spec:
           - "-opentracing=lightstep component-name=skipper-ingress token=$(LIGHTSTEP_TOKEN) collector=tracing.zmon.zalan.do:8444 cmd-line=skipper-ingress max-buffered-spans=4096"
         resources:
           limits:
-            memory: 200Mi
+            memory: "{{ .ConfigItems.skipper_ingress_memory }}"
           requests:
-            cpu: 150m
-            memory: 50Mi
+            cpu: "{{ .ConfigItems.skipper_ingress_cpu }}"
+            memory: "{{ .ConfigItems.skipper_ingress_memory }}"
         readinessProbe:
           httpGet:
             path: /kube-system/healthz
