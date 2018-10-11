@@ -65,6 +65,7 @@ horizontal_pod_autoscaler_upscale_delay: "3m0s"
 
 # skipper ingress settings
 skipper_ingress_target_average_utilization_cpu: "80"
+skipper_ingress_target_average_utilization_memory: "80"
 skipper_ingress_max_replicas: "100"
 skipper_ingress_min_replicas: "3"
 skipper_ingress_cpu: "500m"
